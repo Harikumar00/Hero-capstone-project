@@ -73,8 +73,7 @@ pipeline {
         
                 
                 
-            }
-        }
+       
         
         stage("Docker: Build Images"){
             steps{
