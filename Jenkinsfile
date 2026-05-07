@@ -79,7 +79,7 @@ pipeline {
             steps{
                 script{
                         dir('admin'){
-                            docker_build("shopnow-admin","${params.BACKEND_DOCKER_TAG}","saiyedin786")
+                            docker_build("shopnow-admin","${params.ADMIN_DOCKER_TAG}","saiyedin786")
                         }
                     
                         dir('backend'){
