@@ -365,21 +365,6 @@ Prometheus + Grafana
 
 ---
 
-# 📸 Screenshots
-
-Add screenshots here:
-
-```text
-screenshots/
-├── architecture.png
-├── jenkins-dashboard.png
-├── sonarqube-report.png
-├── trivy-scan.png
-├── grafana-dashboard.png
-└── eks-cluster.png
-```
-
----
 
 # 📈 Key Features
 
