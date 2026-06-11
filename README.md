@@ -593,6 +593,728 @@ b.	Terraform plan
 <img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/49d0f847-a58f-4d89-8a6c-3f859be684b4" />
 
 
+c.	Terraform apply
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/3e5dc33c-e70a-431d-bfcf-d100f4006c4f" />
+
+Output:
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/b4627a04-d1fe-45a6-b7d2-0723fd2112a5" />
+
+Step-3 : configuring following on Jenkins master using Ansible configuration management Tool
+
+IMP: After creation of  ec2-instance as in previous step update public ip in hosts.ini in ansible folder
+
+•	docker
+•	docker-compose-v2
+•	jenkins
+•	awscli
+•	kubectl
+•	eksctl
+•	trivy
+
+Hosts.ini
+
+[ubuntu_servers]
+jenkinsmaster ansible_host=65.2.122.131
+[ubuntu_servers:vars]
+ansible_user=ubuntu
+ansible_ssh_private_key_file=~/capstone-user-key.pem
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+
+basic_setup.yml
+---
+- name: Setup Docker, Docker Compose v2 and Jenkins on Ubuntu 24
+  hosts: all
+  become: yes
+
+  vars:
+    jenkins_keyring: /etc/apt/keyrings/jenkins-keyring.asc
+    docker_keyring: /etc/apt/keyrings/docker.gpg
+
+  tasks:
+
+    # -----------------------------
+    # SYSTEM UPDATE
+    # -----------------------------
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install required packages
+      apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+
+    # -----------------------------
+    # DOCKER INSTALLATION
+    # -----------------------------
+    - name: Ensure keyrings directory exists
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Download Docker GPG key
+      get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /tmp/docker.asc
+
+    - name: Convert Docker GPG key
+      command: gpg --dearmor -o {{ docker_keyring }} /tmp/docker.asc
+      args:
+        creates: "{{ docker_keyring }}"
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64 signed-by={{ docker_keyring }}] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+
+    - name: Update apt cache after Docker repo
+      apt:
+        update_cache: yes
+
+    - name: Install Docker Engine & plugins
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: latest
+
+    - name: Start and enable Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add ubuntu user to docker group
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
+    # -----------------------------
+    # JAVA INSTALLATION
+    # -----------------------------
+    - name: Install Java and fontconfig
+      apt:
+        name:
+          - fontconfig
+          - openjdk-21-jre
+        state: present
+
+    # -----------------------------
+    # JENKINS INSTALLATION
+    # -----------------------------
+    - name: Download Jenkins GPG key
+      get_url:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
+        dest: "{{ jenkins_keyring }}"
+        mode: '0644'
+
+    - name: Add Jenkins repository
+      apt_repository:
+        repo: "deb [signed-by={{ jenkins_keyring }}] https://pkg.jenkins.io/debian-stable binary/"
+        state: present
+        filename: jenkins
+
+    - name: Update apt cache after Jenkins repo
+      apt:
+        update_cache: yes
+
+    - name: Install Jenkins
+      apt:
+        name: jenkins
+        state: present
+
+    - name: Enable and start Jenkins
+      systemd:
+        name: jenkins
+        state: started
+        enabled: yes
+
+    # -----------------------------
+    # PERMISSIONS & RESTARTS
+    # -----------------------------
+    - name: Add jenkins user to docker group
+      user:
+        name: jenkins
+        groups: docker
+        append: yes
+
+    - name: Restart Docker
+      systemd:
+        name: docker
+        state: restarted
+
+    - name: Restart Jenkins
+      systemd:
+        name: jenkins
+        state: restarted
+
+    # -----------------------------
+    # CLEANUP
+    # -----------------------------
+    - name: Remove temporary files
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/docker.asc
+
+# -----------------------------
+# AWS CLI INSTALLATION (your steps converted)
+# -----------------------------
+
+    - name: Install unzip dependency
+      apt:
+        name: unzip
+        state: present
+        update_cache: yes
+
+    - name: Download AWS CLI v2 zip
+      get_url:
+        url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+        dest: /tmp/awscliv2.zip
+
+    - name: Extract AWS CLI zip
+      unarchive:
+        src: /tmp/awscliv2.zip
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Install AWS CLI v2
+      command: >
+        /tmp/aws/install -i /usr/local/aws-cli -b /usr/local/bin --update
+      args:
+        creates: /usr/local/bin/aws
+
+    - name: Verify AWS CLI installation
+      command: aws --version
+      register: aws_output
+      changed_when: false
+
+    - debug:
+        var: aws_output.stdout
+
+
+    
+
+    # -----------------------------
+    # CLEANUP
+    # -----------------------------
+    - name: Remove AWS CLI temp files
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/aws
+        - /tmp/awscliv2.zip
+
+# -----------------------------
+# KUBECTL INSTALLATION
+# -----------------------------
+
+    - name: Download kubectl binary
+      get_url:
+        url: https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/kubectl
+        dest: /tmp/kubectl
+        mode: '0755'
+
+    - name: Move kubectl to /usr/local/bin
+      command: mv /tmp/kubectl /usr/local/bin/kubectl
+      args:
+        creates: /usr/local/bin/kubectl
+
+    - name: Verify kubectl installation
+      command: kubectl version --client --short
+      register: kubectl_output
+      changed_when: false
+
+    - debug:
+        var: kubectl_output.stdout
+
+# -----------------------------
+# EKSCTL INSTALLATION
+# -----------------------------
+
+    - name: Download eksctl tar.gz
+      get_url:
+        url: https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz
+        dest: /tmp/eksctl.tar.gz
+
+    - name: Extract eksctl binary
+      unarchive:
+        src: /tmp/eksctl.tar.gz
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Move eksctl to /usr/local/bin
+      command: mv /tmp/eksctl /usr/local/bin/eksctl
+      args:
+        creates: /usr/local/bin/eksctl
+
+    - name: Verify eksctl installation
+      command: eksctl version
+      register: eksctl_output
+      changed_when: false
+
+    - debug:
+        var: eksctl_output.stdout
+
+    # -----------------------------
+    # CLEANUP
+    # -----------------------------
+    - name: Remove eksctl temp files
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/eksctl
+        - /tmp/eksctl.tar.gz
+
+    # -----------------------------
+    # TRIVY INSTALLATION
+    # -----------------------------
+
+    - name: Remove old Trivy repo (if exists)
+      file:
+        path: /etc/apt/sources.list.d/trivy.list
+        state: absent
+
+    - name: Remove old Trivy keyring
+      file:
+        path: /usr/share/keyrings/trivy.gpg
+        state: absent
+
+    - name: Download Trivy GPG key (ASCII)
+      get_url:
+        url: https://aquasecurity.github.io/trivy-repo/deb/public.key
+        dest: /tmp/trivy.asc
+
+    - name: Convert Trivy key to GPG (IMPORTANT)
+      command: >
+        gpg --dearmor -o /usr/share/keyrings/trivy.gpg /tmp/trivy.asc
+      args:
+        creates: /usr/share/keyrings/trivy.gpg
+
+    - name: Add Trivy repository
+      apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb {{ ansible_distribution_release }} main"
+        state: present
+        filename: trivy
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Trivy
+      apt:
+        name: trivy
+        state: present
+
+
+
+Connecting ec2 instance from local ubuntu terminal
+If using windows pc than install Ubuntu terminal from internet
+
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/425d7f9c-b039-493c-96dd-7870e2632bc2" />
+
+Open ubuntu terminal  
+Go to terraform folder
+cd /mnt/c/Users/Admin/Desktop/herovired/Hero-capstone-project/terraform
+
+copy capstone-user-key.pem to ~/ location (home location)
+cp capstone-user-key.pem ~/
+
+change the permission
+chmod 400 ~/capstone-user-key.pem
+
+go to ansible folder
+cd /mnt/c/Users/Admin/Desktop/herovired/Hero-capstone-project/ansible
+
+check for the connectivity
+ansible ubuntu_servers -i hosts.ini -m ping
+
+run basic-setup.yml file using below command in ubuntu terminal
+ansible-playbook -i hosts.ini basic-setup.yml
+
+
+
+output:
+saiyedin786@DESKTOP-43VHE2R:/mnt/c/Users/Admin/Desktop/herovired/Hero-capstone-project/ansible$ ansible ubuntu_servers -i hosts.ini -m ping
+jenkinsmaster | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+saiyedin786@DESKTOP-43VHE2R:/mnt/c/Users/Admin/Desktop/herovired/Hero-capstone-project/ansible$ ansible-playbook -i hosts.ini basic-setup.yml
+
+PLAY [Setup Docker, Docker Compose v2 and Jenkins on Ubuntu 24] ********************************************************************************************************
+TASK [Gathering Facts] *************************************************************************************************************************************************ok: [jenkinsmaster]
+
+TASK [Update apt cache] ************************************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Install required packages] ***************************************************************************************************************************************ok: [jenkinsmaster]
+
+TASK [Ensure keyrings directory exists] ********************************************************************************************************************************ok: [jenkinsmaster]
+
+TASK [Download Docker GPG key] *****************************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Convert Docker GPG key] ******************************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Add Docker repository] *******************************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Update apt cache after Docker repo] ******************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Install Docker Engine & plugins] *********************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Start and enable Docker] *****************************************************************************************************************************************ok: [jenkinsmaster]
+
+TASK [Add ubuntu user to docker group] *********************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Install Java and fontconfig] *************************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Download Jenkins GPG key] ****************************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Add Jenkins repository] ******************************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Update apt cache after Jenkins repo] *****************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Install Jenkins] *************************************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Enable and start Jenkins] ****************************************************************************************************************************************ok: [jenkinsmaster]
+
+TASK [Add jenkins user to docker group] ********************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Restart Docker] **************************************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Restart Jenkins] *************************************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Remove temporary files] ******************************************************************************************************************************************changed: [jenkinsmaster] => (item=/tmp/docker.asc)
+
+TASK [Install unzip dependency] ****************************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Download AWS CLI v2 zip] *****************************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Extract AWS CLI zip] *********************************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Install AWS CLI v2] **********************************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Verify AWS CLI installation] *************************************************************************************************************************************ok: [jenkinsmaster]
+
+TASK [debug] ***********************************************************************************************************************************************************ok: [jenkinsmaster] => {
+    "aws_output.stdout": "aws-cli/2.34.63 Python/3.14.5 Linux/7.0.0-1004-aws exe/x86_64.ubuntu.26"
+}
+
+TASK [Remove AWS CLI temp files] ***************************************************************************************************************************************changed: [jenkinsmaster] => (item=/tmp/aws)
+changed: [jenkinsmaster] => (item=/tmp/awscliv2.zip)
+
+TASK [Download kubectl binary] *****************************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Move kubectl to /usr/local/bin] **********************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Verify kubectl installation] *************************************************************************************************************************************ok: [jenkinsmaster]
+
+TASK [debug] ***********************************************************************************************************************************************************ok: [jenkinsmaster] => {
+    "kubectl_output.stdout": "Client Version: v1.19.6-eks-49a6c0"
+}
+
+TASK [Download eksctl tar.gz] ******************************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Extract eksctl binary] *******************************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Move eksctl to /usr/local/bin] ***********************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Verify eksctl installation] **************************************************************************************************************************************ok: [jenkinsmaster]
+
+TASK [debug] ***********************************************************************************************************************************************************ok: [jenkinsmaster] => {
+    "eksctl_output.stdout": "0.227.0"
+}
+
+TASK [Remove eksctl temp files] ****************************************************************************************************************************************ok: [jenkinsmaster] => (item=/tmp/eksctl)
+changed: [jenkinsmaster] => (item=/tmp/eksctl.tar.gz)
+
+TASK [Remove old Trivy repo (if exists)] *******************************************************************************************************************************ok: [jenkinsmaster]
+
+TASK [Remove old Trivy keyring] ****************************************************************************************************************************************ok: [jenkinsmaster]
+
+TASK [Download Trivy GPG key (ASCII)] **********************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Convert Trivy key to GPG (IMPORTANT)] ****************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Add Trivy repository] ********************************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Update apt cache] ************************************************************************************************************************************************changed: [jenkinsmaster]
+
+TASK [Install Trivy] ***************************************************************************************************************************************************changed: [jenkinsmaster]
+
+PLAY RECAP *************************************************************************************************************************************************************jenkinsmaster              : ok=45   changed=32   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+saiyedin786@DESKTOP-43VHE2R:/mnt/c/Users/Admin/Desktop/herovired/Hero-capstone-project/ansible$
+
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/c527c5d4-4671-483c-a572-8391eced9347" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/eac68a9e-82a3-4245-93f5-dd52d2698b8d" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/b925bb1c-1784-45dc-a26c-928503da45f2" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/470c2a0e-db1e-4e13-ba47-1244bc373def" />
+
+Verification
+-> docker,docker-compose-v2
+    docker --version
+-> jenkins
+   jenkins --version
+-> awscli
+     aws --version
+-> kubectl
+   kubectl version --client
+-> eksctl
+    eksctl version
+-> trivy
+    trivy –version
+    
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/c17c81c9-c8c0-422b-b3ba-c4013ce2651e" />
+
+Step-4. jenkins setup
+ports : 22,80,30000-32767,465,25,3000-10000,
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/2d8cf122-6435-4e39-91b0-56a93d56c94b" />
+
+Open in browser
+http://public_ip:8080
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/487bf3ab-15cc-451c-8f24-054bc2618e7f" />
+
+Generate password: username is admin by default
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/559557e9-5b9b-4329-9f24-1cce55cdd30e" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/710262fe-b053-4c1b-aaf8-9603f2b4ae54" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/3eead453-2693-46ed-9e77-31e21649684f" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/1d42f9c7-d934-427e-b2de-30cde601762c" />
+
+Step 5 Pluggin installation
+ Go to Jenkins Master 
+Manage Jenkins --> Plugins --> Available plugins 
+install the below plugins:
+   Docker
+   Pipeline: Stage View
+   OWASP dependency check
+   SonarQube Scanner
+
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/2ee15fa3-dca7-4275-b8d2-5b693893d38e" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/6873a985-d204-4494-83e6-247b142ebe6a" />
+
+Step 6. OWASP setup
+install OWASP plugin (already installed in step 5)
+
+jenkins tools- OWASP dependency check
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/2f106c04-88d2-4a1d-837a-ae44b570d2bc" />
+
+Step 7: Jenkins-Github integration
+•	Go to Github.com
+•	Profile->Settings->developer settings
+•	Create new token
+
+<img width="975" height="452" alt="image" src="https://github.com/user-attachments/assets/7998a5e0-6438-4909-8e19-324c5ae579f3" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/7437fb20-1764-41f0-8d2e-cdcd4f9973ba" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/81e8d05b-4f41-4bd1-9968-444bfd362322" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/ac8bdb11-1590-487c-b197-03ada2fb27d2" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/4bdfb523-8afa-4696-bdd2-e0e4bfe82213" />
+
+Go to
+Manage Jenkins->credentials
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/6afc5f3d-c639-48cf-bc9d-f3aa8c641c94" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/ba4ea217-e2be-4123-b5e6-6935ceeac627" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/f1681bd7-534f-427a-a84d-9c7e4ae479dd" />
+
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/554fc5d1-57e4-42af-8408-3b628f7e8ffc" />
+
+Step-8 Jenkins-DockerHub integration
+Go to dockerhub.com and login
+Click on Account settings 
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/c349fd54-ea40-46d1-937e-8feabe45c12c" />
+
+Click personal access tokens on left
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/5d909d82-a41a-4554-99db-53ca740351de" />
+
+Click on Generate New token
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/dd33b7f8-78b7-410c-a2f5-61a1d5658029" />
+
+Give some name
+And click Generate
+Copy new token
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/7d4d0df0-513d-43c0-8c4e-8e03fb00704f" />
+
+Go to Jenkins-> manage Jenkins->credentials
+Click on credentials
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/ab8cd4f8-efd7-486e-8e21-be2d9b957baa" />
+
+Click on Add credentials
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/c23d8642-6542-435b-b2a0-b0202554e950" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/c44028d2-b373-4671-8068-f979b0010161" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/5987f719-a0b8-4332-a119-61ade2ce22cf" />
+
+Step 9: Sonarqube setup
+
+install SonarQube Scanner
+
+ sudo docker run -itd --name SonarQube-Server -p 9000:9000 sonarqube:lts-community
+ 
+open in browser
+
+   http://public_ip:9000
+
+generate sonar-token in sonarcube portal
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/9f4d12f0-90d4-4d23-8255-0d19d4015d16" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/752e69ee-5bb5-4935-8cc1-ac790b731c71" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/f43b53fc-210e-4b93-bed4-86dbfc207630" />
+
+Jenkins->manage Jenkins->tools
+
+Look for Sonarqube scanner and fill detail as below and save
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/fcd52687-e106-4ee6-a5d4-882648119867" />
+
+Go to sonarqube server->administration->security->users
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/0d71e473-238d-4da3-be8f-c60e83732fc0" />
+
+Click on update tokens
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/65122b23-2476-4db8-8280-95fbd0583d73" />
+
+Give name and then generate token and then copy it
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/260f09ed-ec36-424c-b30c-f45691a10dfb" />
+
+Now Go to
+
+Manage jenkins->credentials
+
+Click on Credentials
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/9a5f6262-c91a-40dd-9821-06eaab894203" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/339a1ee9-b80f-4c26-9f15-62132495309d" />
+
+Manage jenkins->system
+
+Look for sonarqube installations fill as below and then save
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/f6f53c9d-6d43-4375-906c-8a76e007a548" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/e3888e9f-b4a4-4a9c-be04-1a83114458bb" />
+
+Now go sonarqube server
+
+Administration->configuration->webhooks
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/69818266-7c45-44c2-909d-43c1743aa96d" />
+
+Click on create
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/53762153-b9fc-40cc-9ca2-7d564f86d875" />
+
+Fill as shown
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/e42a0d85-913a-4ff3-aa0e-b1c136836241" />
+
+Click create
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/4ce6b61a-b012-472e-a7db-697e20b3483b" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
