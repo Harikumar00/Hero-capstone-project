@@ -1385,26 +1385,37 @@ kubectl get nodes
 <img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/bf2b0001-5a5d-46fe-a842-e59b99a7105d" />
 
 
+Step 12 Argocd setup
+
+kubectl create namespace argocd
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/d710c684-8d38-48f7-8549-12bbee93273a" />
+
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/dd0ffc0d-d894-4d97-a82a-723e160b7582" />
+
+kubectl get pods -n argocd
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/5f0345f1-805e-4ce7-9198-d190e9e2fa2d" />
+
+sudo curl --silent --location -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/download/v2.4.7/argocd-linux-amd64
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/0b1151a9-b72c-46e8-ad1d-68848fd07586" />
 
 
+sudo chmod +x /usr/local/bin/argocd
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/996725c5-c74d-4388-9644-668f858a9180" />
+
+kubectl get svc -n argocd
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/8d9b685c-cc7d-477c-93eb-cf674e9078c1" />
 
 
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/fb5a2053-9a82-4cb6-bd48-d3bac69d6e85" />
 
 
 
