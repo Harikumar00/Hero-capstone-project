@@ -1417,6 +1417,634 @@ kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'
 
 <img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/fb5a2053-9a82-4cb6-bd48-d3bac69d6e85" />
 
+kubectl get svc -n argocd
+
+allow port in security group of node 
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/5fb0fa7b-7f27-4d82-850d-5fd214e033ee" />
+
+Access it on browser, click on advance and proceed with
+<public-ip-worker>:<port>
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/c6392de9-6090-4692-a62e-877d56da4431" />
+
+Fetch the initial password of argocd server
+
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/3e902f4a-6581-4a82-8420-3ebff6f0a53c" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/9eb7dc4b-5af3-434e-9fab-4727c13321d6" />
+
+Username: admin
+Now, go to User Info and update your argocd password
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/4de78d90-c9aa-4c20-987c-c5dc723548d2" />
+
+add github repo in settings repositories
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/1100eb27-9eea-4364-88dc-84abf499e90d" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/1c5f4b3a-366d-4b2f-8762-d436f2ec1f18" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/a2f833f0-517c-4758-99f8-c5bbf44a0d85" />
+
+
+adding clusters in argocd
+argocd login 52.66.204.159:30424 --username admin
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/c4ee3267-fc6c-4887-8d19-29688d5bb80d" />
+
+argocd cluster list
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/ed5ac555-b968-4ea3-90e5-e33e0c00d719" />
+
+kubectl config get-contexts
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/04ca27ea-fcc8-4cc8-ab43-6af6aa173210" />
+
+argocd cluster add i-0560ef021d79e121d@shopnow-cluster.ap-south-1.eksctl.io --name shopnow-eks-cluster
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/c53a6ae3-f478-4a57-8f64-8d2a821205d9" />
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/9f6876d2-6fa8-469d-aafe-48de3693761b" />
+
+Step 13 installation of nginx controller
+Install ingress-nginx controller (for external access)
+# For EKS, other cloud provider will have different file
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.12.0-beta.0/deploy/static/provider/aws/deploy.yaml
+
+# For local development (minikube/kind/Docker Desktop)
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.1/deploy/static/provider/kind/deploy.yaml
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/80c1c48c-56e5-44b1-81d8-1e069e5cb4be" />
+
+•	kubectl get pods -n kube-system
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/4d027145-24c7-451b-84bb-627222b7108e" />
+
+•	kubectl get pods -n ingress-nginx
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/5ff730c4-408b-41db-bf40-71ec5aa2ff41" />
+
+•	kubectl top nodes  # Should work after metrics server is running
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/0950ab65-7c77-4dcd-bd5b-40b3b85b327f" />
+
+•	kubectl top pods  # Should work after metrics server is running
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/557c0b93-2037-49a4-a930-30ab4401f59c" />
+
+kubectl create namespace shopnow-demo
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/2cb4d661-b7f9-40e2-85f4-20121e319fdc" />
+
+ArgoCD GitOps
+Git clone https://github.com/saiyedin786/Hero-capstone-project.git
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/740eb76f-9bdc-4951-a427-22b7f940b9b3" />
+
+Go to Hero-capstone-project/kubrnetes/argocd
+# Deploy applications
+kubectl apply -f kubernetes/argocd/umbrella-application.yaml
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/a01ef6a1-06b2-422e-b230-29e73d2894bf" />
+
+kubectl get applications -n argocd
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/33fa40b3-4c87-4a11-a506-ac1f55add2d4" />
+ 
+kubectl get pods -n shopnow-demo
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/44814506-47db-4b58-b36f-4b26034e83ed" />
+
+
+User creation in mongodb
+•	# Run below commands
+•	use admin;
+•	db.createUser({
+•	  user: 'shopuser',
+•	  pwd: 'ShopNowPass123',
+•	  roles: [
+•	    { role: 'readWrite', db: 'shopnow' },
+•	    { role: 'dbAdmin', db: 'shopnow' }
+•	  ]
+•	});
+•	exit
+
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/3e77e07f-7d47-4da3-bc20-3308480e2d51" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/7a68e6d3-75f2-452c-9a8d-208d22421a73" />
+
+# Restart backend deployment
+kubectl rollout restart deploy backend -n shopnow-demo
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/91dd62fd-1e08-4f7f-bc72-da47792998dd" />
+
+kubectl get pods -n shopnow-demo
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/474497c1-02c1-4bad-9b6e-b8f98bf192c4" />
+
+
+kubectl get deploy -n shopnow-demo
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/cd272bef-dd45-493f-bb43-ce3fb6d30ae7" />
+
+kubectl get svc -n shopnow-demo
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/bb93d247-70df-4bab-b547-30992714613e" />
+ 
+kubectl get statefulsets -n shopnow-demo
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/f9ae6d4b-1d02-4f9e-a2bf-1eb03e9b2509" />
+
+kubectl get hpa -n shopnow-demo
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/6353d748-c8a9-42e7-844e-afe686524523" />
+
+kubectl get cm -n shopnow-demo
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/fe260485-4f4d-4b3f-9fbd-5851525f2591" />
+
+kubectl get secrets -n shopnow-demo
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/0ce5660c-e07d-4905-b9d0-6837b6a62b7b" />
+
+kubectl get ing -n shopnow-demo
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/3626f679-0d88-4956-b04f-46006682d86b" />
+
+Step 14: Monitoring using Prometheus and graffana
+Install Helm Chart
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+
+
+chmod 700 get_helm.sh
+./get_helm.sh
+
+Add Helm Stable Charts for Your Local Client
+helm repo add stable https://charts.helm.sh/stable
+
+Add Prometheus Helm Repository
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+Create Prometheus Namespace
+kubectl create namespace prometheus
+kubectl get ns
+Install Prometheus using Helm
+helm install stable prometheus-community/kube-prometheus-stack -n Prometheus
+
+Verify prometheus installation
+kubectl get pods -n Prometheus
+
+Check the services file (svc) of the Prometheus
+kubectl get svc -n Prometheus
+
+Expose Prometheus and Grafana to the external world through Node Port
+Important
+
+change it from Cluster IP to NodePort after changing make sure you save the file and open the assigned nodeport to the service.
+
+kubectl edit svc stable-kube-prometheus-sta-
+
+Verify service
+kubectl get svc -n Prometheus
+
+Now,let’s change the SVC file of the Grafana and expose it to the outer world
+kubectl edit svc stable-grafana -n prometheus
+
+Check grafana service
+kubectl get svc -n prometheus
+Get a password for grafana
+kubectl get secret --namespace prometheus stable-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+Note
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/598e71f4-c70c-4f67-81dd-e9ba36dc1c60" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/80f15834-f2f5-4993-af1f-985ad77a5db0" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/c9ad5cb1-f68b-4e9e-b15c-d459df4fcef4" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/f999b309-3509-4623-9bfb-1d0783f09023" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/c820fa74-0b53-456a-9ac4-ddb1c848bbda" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/6fdcd02c-e05c-4a19-9d5b-aa86cc5dd865" />
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/9198f752-884e-41ad-b6ef-9def913227a3" />
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/cab13903-7e53-4232-b699-674a0b8023f4" />
+
+Username: admin
+
+http://52.66.204.159:30780/query
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/119f781c-a5a1-485b-bf5e-3f6d78ffcbd2" />
+
+http://52.66.204.159:30727/login
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/cc354ff2-b516-48d3-9307-b1a577b63e6a" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/7382fcc0-f74b-40c1-a08f-bc6867988984" />
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/5c5266ba-5c56-4381-b53f-9e30835c2018" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/97399c5e-e766-4827-9a8d-835032c76c8c" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/36573059-c0c8-441f-973d-b77007102243" />
+
+Step : 15 : shared Library setup
+Shared library github repo: 
+https://github.com/saiyedin786/Jenkins_SharedLib.git
+Go to manage Jenkins->system
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/8eb4babf-d3d2-42a9-b8fa-b0553019d622" />
+
+
+Look for Global Trusted Pipeline Libraries
+Fill as given below
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/e7776ed7-45b8-483a-bc25-c0b350969256" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/f0de7920-eb96-452a-a22e-e9cb3352284b" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/cc2b9e36-cfc5-4102-b694-12b4627d6314" />
+
+
+Save
+
+Now usage of shared library
+Insert @Library('Shared') _ at the beginning of pipeline
+
+
+
+
+
+
+
+
+Creating a jenkins job-  capstone-CI
+capstone-CI
+
+@Library('Shared') _
+pipeline {
+    agent any
+    
+    environment{
+        SONAR_HOME = tool "Sonar"
+    }
+    
+    parameters {
+        string(name: 'ADMIN_DOCKER_TAG', defaultValue: '', description: 'Setting docker image for latest push')
+        string(name: 'FRONTEND_DOCKER_TAG', defaultValue: '', description: 'Setting docker image for latest push')
+        string(name: 'BACKEND_DOCKER_TAG', defaultValue: '', description: 'Setting docker image for latest push')
+    }
+    
+    stages {
+        stage("Validate Parameters") {
+            steps {
+                script {
+                    if (params.FRONTEND_DOCKER_TAG == '' || params.BACKEND_DOCKER_TAG == '' || params.ADMIN_DOCKER_TAG == '') {
+                        error("ADMIN_DOCKER_TAG, FRONTEND_DOCKER_TAG and BACKEND_DOCKER_TAG must be provided.")
+                    }
+                }
+            }
+        }
+        stage("Workspace cleanup"){
+            steps{
+                script{
+                    cleanWs()
+                }
+            }
+        }
+        
+        stage('Git: Code Checkout') {
+            steps {
+                script{
+                    code_checkout("https://github.com/saiyedin786/Hero-capstone-project.git","main")
+                }
+            }
+        }
+        
+        stage("Trivy: Filesystem scan"){
+            steps{
+                script{
+                    trivy_scan()
+                }
+            }
+        }
+
+stage("OWASP: Dependency check"){
+            steps{
+                script{
+                    owasp_dependency()
+                }
+            }
+        }
+
+ 
+        
+        stage("SonarQube: Code Analysis"){
+            steps{
+                script{
+                    sonarqube_analysis("Sonar", "Hero-Capstone-Project", "hero-capstone-project")
+                }
+            }
+        }
+        
+        stage("SonarQube: Code Quality Gates"){
+            steps{
+                script{
+                    sonarqube_code_quality()
+                }
+            }
+        }
+             
+            
+        
+        
+        stage("Docker: Build Images"){
+            steps{
+                script{
+                        dir('admin'){
+                            docker_build("shopnow-admin","${params.ADMIN_DOCKER_TAG}","saiyedin786")
+                        }
+                    
+                        dir('backend'){
+                            docker_build("shopnow-backend","${params.BACKEND_DOCKER_TAG}","saiyedin786")
+                        }
+                    
+                        dir('frontend'){
+                            docker_build("shopnow-frontend","${params.FRONTEND_DOCKER_TAG}","saiyedin786")
+                        }
+                }
+            }
+        }
+        
+        stage("Docker: Push to DockerHub"){
+            steps{
+                script{
+                    docker_push("shopnow-admin","${params.ADMIN_DOCKER_TAG}","saiyedin786") 
+                    docker_push("shopnow-backend","${params.BACKEND_DOCKER_TAG}","saiyedin786")
+                    docker_push("shopnow-frontend","${params.FRONTEND_DOCKER_TAG}","saiyedin786")
+                }
+            }
+        }
+    }
+    post{
+        success{
+        
+           build job: "capstone-CD",
+	   wait: true,
+           propagate: false,
+           parameters: [
+           string(name: 'ADMIN_DOCKER_TAG', value: "${params.ADMIN_DOCKER_TAG}"),
+           string(name: 'FRONTEND_DOCKER_TAG', value: "${params.FRONTEND_DOCKER_TAG}"),
+           string(name: 'BACKEND_DOCKER_TAG', value: "${params.BACKEND_DOCKER_TAG}")
+           ]
+        }
+    }
+}
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/fd573bde-a38d-4520-b4dc-31124d915096" />
+
+
+Also create another Jenkins job – capstone-CD
+capstone-CD
+@Library('Shared') _
+pipeline {
+    agent any
+    
+    parameters {
+        string(name: 'ADMIN_DOCKER_TAG', defaultValue: '', description: 'Admin Docker tag of the image built by the CI job')
+        string(name: 'FRONTEND_DOCKER_TAG', defaultValue: '', description: 'Frontend Docker tag of the image built by the CI job')
+        string(name: 'BACKEND_DOCKER_TAG', defaultValue: '', description: 'Backend Docker tag of the image built by the CI job')
+    }
+
+    stages {
+        stage("Workspace cleanup"){
+            steps{
+                script{
+                    cleanWs()
+                }
+            }
+        }
+        
+        stage('Git: Code Checkout') {
+            steps {
+                script{
+                    code_checkout("https://github.com/saiyedin786/Hero-capstone-project.git","main")
+                }
+            }
+        }
+        
+        stage('Verify: Docker Image Tags') {
+            steps {
+                script{
+                    echo "ADMIN_DOCKER_TAG: ${params.ADMIN_DOCKER_TAG}"
+                    echo "FRONTEND_DOCKER_TAG: ${params.FRONTEND_DOCKER_TAG}"
+                    echo "BACKEND_DOCKER_TAG: ${params.BACKEND_DOCKER_TAG}"
+                }
+            }
+        }
+        
+        
+      stage("Update: Helm values.yaml files") {
+    steps {
+        script {
+
+            dir('kubernetes/helm/charts/admin') {
+                sh """
+                    sed -i "s/^[[:space:]]*tag:.*/  tag: ${params.ADMIN_DOCKER_TAG}/" values.yaml
+                """
+            }
+
+            dir('kubernetes/helm/charts/backend') {
+                sh """
+                    sed -i "s/^[[:space:]]*tag:.*/  tag: ${params.BACKEND_DOCKER_TAG}/" values.yaml
+                """
+            }
+
+            dir('kubernetes/helm/charts/frontend') {
+                sh """
+                    sed -i "s/^[[:space:]]*tag:.*/  tag: ${params.FRONTEND_DOCKER_TAG}/" values.yaml
+                """
+            }
+        }
+    }
+}
+        
+        stage("Git: Code update and push to GitHub"){
+            steps{
+                script{
+                    withCredentials([gitUsernamePassword(credentialsId: 'Github-cred', gitToolName: 'Default')]) {
+                        sh '''
+                        echo "Checking repository status: "
+                        git status
+                    
+                        echo "Adding changes to git: "
+                        git add .
+                        
+                        echo "Commiting changes: "
+                        git commit -m "Updated environment variables"
+                        
+                        echo "Pushing changes to github: "
+                        git push https://github.com/saiyedin786/Hero-capstone-project.git main
+                    '''
+                    }
+                }
+            }
+        }
+    }
+  post {
+        success {
+            script {
+                emailext attachLog: true,
+                from: 'saiyedin786@gmail.com',
+                subject: "Shopnow Application has been updated and deployed - '${currentBuild.result}'",
+                body: """
+                    <html>
+                    <body>
+                        <div style="background-color: #FFA07A; padding: 10px; margin-bottom: 10px;">
+                            <p style="color: black; font-weight: bold;">Project: ${env.JOB_NAME}</p>
+                        </div>
+                        <div style="background-color: #90EE90; padding: 10px; margin-bottom: 10px;">
+                            <p style="color: black; font-weight: bold;">Build Number: ${env.BUILD_NUMBER}</p>
+                        </div>
+                        <div style="background-color: #87CEEB; padding: 10px; margin-bottom: 10px;">
+                            <p style="color: black; font-weight: bold;">URL: ${env.BUILD_URL}</p>
+                        </div>
+                    </body>
+                    </html>
+            """,
+            to: 'saiyedin786@gmail.com',
+            mimeType: 'text/html'
+            }
+        }
+      failure {
+            script {
+                emailext attachLog: true,
+                from: 'saiyedin786@gmail.com',
+                subject: "Shopnow Application build failed - '${currentBuild.result}'",
+                body: """
+                    <html>
+                    <body>
+                        <div style="background-color: #FFA07A; padding: 10px; margin-bottom: 10px;">
+                            <p style="color: black; font-weight: bold;">Project: ${env.JOB_NAME}</p>
+                        </div>
+                        <div style="background-color: #90EE90; padding: 10px; margin-bottom: 10px;">
+                            <p style="color: black; font-weight: bold;">Build Number: ${env.BUILD_NUMBER}</p>
+                        </div>
+                    </body>
+                    </html>
+            """,
+            to: 'saiyedin786@gmail.com',
+            mimeType: 'text/html'
+            }
+        }
+    }
+}
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/b97353d7-14f7-478b-8516-2135a02eadd5" />
+
+Running Capstone-CI job in Jenkins
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/926e5cbf-07ea-4b94-85db-05d2ec651d8f" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/ce36a24e-a831-43bf-b2fc-2e23446cef8f" />
+
+Capstone-CI will automatically trigger capstone-CD
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/f4333d74-ddc7-49df-a0af-191dfc2343c5" />
+
+Image updated in dockerhub.com repo by capstone-CI Jenkins job
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/e8895b3c-e56e-4b0b-9d5b-10a878c99c5f" />
+
+Version updated automatically in github repo at
+kubernetes/helm/charts/admin/values.yaml and frontend,backend etc by capstone-CD Jenkins job
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/baac8bff-7bb4-4bf9-b5fc-8e8b7e6089f9" />
+
+Then argocd will pull the code from github repo and deploy into eks cluster
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/e1071146-65fe-4eca-8ccf-63c8357d20bc" />
+
+Shopnow app frontend will be available at 
+http://ac28051b6575f4e289fde2dc87abb669-9807b455609f8957.elb.ap-south-1.amazonaws.com/ismail
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/391138d8-fdfa-4ae1-bdb9-72785981589d" />
+
+Shopnow app admin will be available at 
+http://ac28051b6575f4e289fde2dc87abb669-9807b455609f8957.elb.ap-south-1.amazonaws.com/ismail-admin
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/0f7c0912-4817-40e9-9800-cd1293eb3165" />
+
+
+Getting success on gmail
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/f888c801-7111-4b91-a36e-519195118cb6" />
+
+
+Delete Using kubectl (Recommended)
+
+First list apps:
+
+kubectl get applications -n argocd
+
+Delete all applications:
+
+kubectl delete applications --all -n argocd
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/6677bf51-494c-48b7-8823-355c2abcbc21" />
+
+delete:
+eksctl delete nodegroup \
+  --cluster=shopnow-cluster \
+  --region=ap-south-1 \
+  --name=shopnow
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/115f8b51-f8a0-45d6-8cf1-8d4f8d533b43" />
+
+eksctl delete cluster \
+  --name=shopnow-cluster \
+  --region=ap-south-1
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/c4f5e850-95d1-45b0-8ae2-b2ab8b1d8c3c" />
+
+aws eks list-clusters --region ap-south-1
+
+aws ec2 delete-key-pair \
+  --key-name eks-nodegroup-key \
+  --region ap-south-1
+
+rm eks-nodegroup-key.pem  (local)
+
+aws iam list-open-id-connect-providers
+
+aws iam delete-open-id-connect-provider \
+  --open-id-connect-provider-arn <OIDC_ARN>
+
+aws iam delete-open-id-connect-provider \
+  --open-id-connect-provider-arn arn:aws:iam::254292659362:oidc-provider/oidc.eks.ap-south-1.amazonaws.com/id/20BC84A3F1FC691114C361B6F1AFA6AD
+
+Terraform destroy
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/7d6612f3-b10b-4bba-b4de-f5976c419f75" />
+
+<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/4e5a32a4-65b0-4630-99e7-a5631d7770a5" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
