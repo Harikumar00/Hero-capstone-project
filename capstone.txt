@@ -1,0 +1,705 @@
+
+
+
+https://ubuntu.com/download/wsl
+
+
+
+
+
+
+1. create Iam user
+aws configure
+
+
+2. creating an jenkinsmaster ec2 instance using terraform
+
+
+
+3. ansible
+
+
+update public ip in hosts.ini
+
+open ubuntu terminal
+if not download from https://ubuntu.com/download/wsl
+
+
+cd /mnt/c/Users/Admin/Desktop/herovired/Hero-capstone-project/terraform
+cp capstone-user-key.pem ~/
+chmod 400 ~/capstone-user-key.pem
+
+
+cd /mnt/c/Users/Admin/Desktop/herovired/Hero-capstone-project/ansible
+
+ansible ubuntu_servers -i hosts.ini -m ping
+
+ansible-playbook -i hosts.ini basic-setup.yml
+
+afetr successful installation verify following
+
+-> docker,docker-compose-v2
+docker --version
+
+-> jenkins
+jenkins --version
+-> awscli
+
+aws --version
+-> kubectl
+kubectl version --client
+
+-> eksctl
+eksctl version
+-> trivy
+
+trivy --version
+
+
+
+4. jenkins setup
+
+ports : 22,80,30000-32767,465,25,3000-10000,
+
+
+5. Go to Jenkins Master and click on Manage Jenkins --> Plugins --> Available plugins install the below plugins:
+   Docker
+   Pipeline: Stage View
+   OWASP dependency check
+   SonarQube Scanner
+
+6. OWASP setup
+   install OWASP plugin
+	jenkins tools- OWASP dependency check
+
+7. Sonarqube setup
+   install SonarQube Scanner
+   sudo docker run -itd --name SonarQube-Server -p 9000:9000 sonarqube:lts-community
+
+   open in browser
+   http://13.203.161.35:9000
+
+   generate sonar-token in sonarcube portal go to sonarqube 
+   server->administration->security->users->update tokens->copy token
+
+  
+
+   update in jenkins credentials
+
+   update in jenkins tools
+
+   update in jenkins system
+
+   generate webhook Administration->configuration->webhooks in sonarqube portal - http://65.2.122.131/sonarqube-webhook/ 
+
+8. Email setup
+generate app password
+	
+and then update in jenkins credetials
+test through jenkins system
+
+
+
+9. github - jenkins integration
+
+   generate token on github
+   
+
+   and than update in jenkins credentials 
+
+10. dockerhub jenkins integration:
+generate token in dockerhub
+
+
+
+
+and than update in jenkins credentials
+
+
+
+
+
+11. eks cluster setup (manual)
+
+Create EKS Cluster (Master machine)
+
+-->create iam role
+
+12.  Go to:
+👉 AWS Console → IAM → Roles → Create Role
+
+Trusted entity: EC2
+Attach policies:
+AmazonEKSClusterPolicy
+AmazonEKSWorkerNodePolicy
+AmazonEC2ContainerRegistryReadOnly
+AmazonEKS_CNI_Policy
+administratoraccess
+
+Name:
+eksctl-ec2-role
+
+Step 2: Attach Role to EC2
+Go to EC2 → Instances
+Select your instance (jenkinsmaster)
+
+Click:
+Actions → Security → Modify IAM role
+Attach:
+eksctl-ec2-role
+Step 3: Verify Role
+
+
+13. EKS cluster setup   -->create cluster
+
+eksctl create cluster --name=shopnow-cluster --region=ap-south-1 --version=1.30 --without-nodegroup 
+                     
+aws eks list-clusters --region ap-south-1                    
+                    
+
+-->make eks-nodegroup-key keypair
+
+-->Associate IAM OIDC Provider (Master machine)
+
+eksctl utils associate-iam-oidc-provider \
+  --region ap-south-1 \
+  --cluster shopnow-cluster \
+  --approve
+
+
+-->Create Nodegroup (Master machine)
+eksctl create nodegroup --cluster=shopnow-cluster \
+                     --region=ap-south-1 \
+                     --name=shopnow \
+                     --node-type=t2.large \
+                     --nodes=2 \
+                     --nodes-min=2 \
+                     --nodes-max=2 \
+                     --node-volume-size=29 \
+                     --ssh-access \
+                     --ssh-public-key=eks-nodegroup-key 
+kubectl get nodes
+
+
+
+
+
+
+
+
+14. Argocd setup
+
+kubectl create namespace argocd
+
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+kubectl get pods -n argocd
+
+sudo curl --silent --location -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/download/v2.4.7/argocd-linux-amd64
+
+sudo chmod +x /usr/local/bin/argocd
+
+kubectl get svc -n argocd
+
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'
+
+kubectl get svc -n argocd
+
+allow port in security group of node 
+
+Access it on browser, click on advance and proceed with
+<public-ip-worker>:<port>
+
+Fetch the initial password of argocd server
+
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
+
+
+Username: admin
+Now, go to User Info and update your argocd password
+
+
+add github repo in settings repositories
+
+adding clusters in argocd
+argocd login 13.127.92.108:31305 --username admin
+
+argocd cluster list
+
+kubectl config get-contexts
+
+argocd cluster add i-08b4cd78d24e9e2c4@shopnow-cluster.ap-south-1.eksctl.io --name shopnow-eks-cluster
+
+
+
+
+15.   # Install ingress-nginx controller (for external access)
+# For EKS, other cloud provider will have different file
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.12.0-beta.0/deploy/static/provider/aws/deploy.yaml
+
+# For local development (minikube/kind/Docker Desktop)
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.1/deploy/static/provider/kind/deploy.yaml
+
+# Verify installations
+kubectl get pods -n kube-system
+kubectl get pods -n ingress-nginx
+kubectl top nodes  # Should work after metrics server is running
+kubectl top pods  # Should work after metrics server is running
+
+
+============================
+
+
+17. ArgoCD GitOps
+
+# Install ArgoCD first
+
+already done above--------------------------------------------
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+-----------------------------------------------------------------
+
+Deploying Application
+
+# Create target namespace
+kubectl create namespace shopnow-demo
+
+
+IMP: update cluster name in kubernetes/argocd/umbrella-application.yaml and in backend,fronted and admin inside kubernetes/argocd/apps folder
+
+https://E7A7A4713A01052C7BC01F7A8EB2CB0E.gr7.ap-south-1.eks.amazonaws.com
+
+
+# Deploy applications
+kubectl apply -f kubernetes/argocd/umbrella-application.yaml
+
+# Check all ArgoCD application status:
+kubectl get applications -n argocd
+
+3. Create users in MongoDB after the mongodb pods are healthy
+
+# check the status of the mongo-0 pods 
+kubectl get pods -n shopnow-demo
+# if mongo-0 pod is healthy, then run following command to create a user for the backend to connect
+# user credentials should be same as mentioned in the backend secrets-db.yaml file
+# First exex into the pods
+kubectl -n shopnow-demo exec -it mongo-0 -- mongosh
+
+# Run below commands
+use admin;
+db.createUser({
+  user: 'shopuser',
+  pwd: 'ShopNowPass123',
+  roles: [
+    { role: 'readWrite', db: 'shopnow' },
+    { role: 'dbAdmin', db: 'shopnow' }
+  ]
+});
+
+exit
+
+
+# Restart backend deployment
+kubectl rollout restart deploy backend -n shopnow-demo
+
+18. verify status
+3. Check the resources deployed
+# Check Pods
+kubectl get pods -n shopnow-demo
+
+# Check Deployment
+kubectl get deploy -n shopnow-demo
+
+# Check Services
+kubectl get svc -n shopnow-demo
+
+# Check daemonsets
+kubectl get daemonsets -n shopnow-demo
+
+# Check statefulsets
+kubectl get statefulsets -n shopnow-demo
+
+# Check HPA
+kubectl get hpa -n shopnow-demo
+
+# Check all of the above at once
+kubectl get all -n shopnow-demo
+
+# Check configmaps
+kubectl get cm -n shopnow-demo
+
+# Check secrets
+kubectl get secrets -n shopnow-demo
+
+# Check ingress
+kubectl get ing -n shopnow-demo
+
+# Sequence to debug in case of any issue with the pods
+kubectl get pods -n shopnow-demo
+kubectl describe pod backend-746cc99cd-cqrgf -n shopnow-demo # Assuming that pod backend-746cc99cd-cqrgf has an error
+kubectl logs backend-746cc99cd-cqrgf -n shopnow-demo --previous # If no details are found in the above command or if details like liveness probe failed are coming
+🌐 Access the Apps
+Customer App → http:///
+
+
+==============================
+
+=========================================================================
+
+
+How to monitor EKS cluster, kubernetes components and workloads using prometheus and grafana via HELM (On Master machine)
+Install Helm Chart
+
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+
+chmod 700 get_helm.sh
+
+./get_helm.sh
+
+Add Helm Stable Charts for Your Local Client
+helm repo add stable https://charts.helm.sh/stable
+
+Add Prometheus Helm Repository
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+Create Prometheus Namespace
+kubectl create namespace prometheus
+kubectl get ns
+
+Install Prometheus using Helm
+helm install stable prometheus-community/kube-prometheus-stack -n prometheus
+
+Verify prometheus installation
+kubectl get pods -n prometheus
+
+Check the services file (svc) of the Prometheus
+kubectl get svc -n prometheus
+
+Expose Prometheus and Grafana to the external world through Node Port
+Important
+
+change it from Cluster IP to NodePort after changing make sure you save the file and open the assigned nodeport to the service.
+
+kubectl edit svc stable-kube-prometheus-sta-prometheus -n prometheus
+image image
+
+Verify service
+kubectl get svc -n prometheus
+Now,let’s change the SVC file of the Grafana and expose it to the outer world
+kubectl edit svc stable-grafana -n prometheus
+image
+
+Check grafana service
+kubectl get svc -n prometheus
+Get a password for grafana
+kubectl get secret --namespace prometheus stable-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+Note
+
+Username: admin
+
+Now, view the Dashboard in Grafana image image image image
+
+
+
+
+==========================================================================
+
+
+
+
+=====================================
+
+
+
+17. shared library setup
+jenkins->system->Global trusted pipeline libraries
+
+
+
+
+
+/var/lib/jenkins/workspace/
+
+
+
+capstone-CI
+
+@Library('Shared') _
+pipeline {
+    agent any
+    
+    environment{
+        SONAR_HOME = tool "Sonar"
+    }
+    
+    parameters {
+        string(name: 'ADMIN_DOCKER_TAG', defaultValue: '', description: 'Setting docker image for latest push')
+        string(name: 'FRONTEND_DOCKER_TAG', defaultValue: '', description: 'Setting docker image for latest push')
+        string(name: 'BACKEND_DOCKER_TAG', defaultValue: '', description: 'Setting docker image for latest push')
+    }
+    
+    stages {
+        stage("Validate Parameters") {
+            steps {
+                script {
+                    if (params.FRONTEND_DOCKER_TAG == '' || params.BACKEND_DOCKER_TAG == '' || params.ADMIN_DOCKER_TAG == '') {
+                        error("ADMIN_DOCKER_TAG, FRONTEND_DOCKER_TAG and BACKEND_DOCKER_TAG must be provided.")
+                    }
+                }
+            }
+        }
+        stage("Workspace cleanup"){
+            steps{
+                script{
+                    cleanWs()
+                }
+            }
+        }
+        
+        stage('Git: Code Checkout') {
+            steps {
+                script{
+                    code_checkout("https://github.com/saiyedin786/Hero-capstone-project.git","main")
+                }
+            }
+        }
+        
+        stage("Trivy: Filesystem scan"){
+            steps{
+                script{
+                    trivy_scan()
+                }
+            }
+        }
+
+ 
+        
+        stage("SonarQube: Code Analysis"){
+            steps{
+                script{
+                    sonarqube_analysis("Sonar", "Hero-Capstone-Project", "hero-capstone-project")
+                }
+            }
+        }
+        
+        stage("SonarQube: Code Quality Gates"){
+            steps{
+                script{
+                    sonarqube_code_quality()
+                }
+            }
+        }
+             
+            
+        
+        
+        stage("Docker: Build Images"){
+            steps{
+                script{
+                        dir('admin'){
+                            docker_build("shopnow-admin","${params.ADMIN_DOCKER_TAG}","saiyedin786")
+                        }
+                    
+                        dir('backend'){
+                            docker_build("shopnow-backend","${params.BACKEND_DOCKER_TAG}","saiyedin786")
+                        }
+                    
+                        dir('frontend'){
+                            docker_build("shopnow-frontend","${params.FRONTEND_DOCKER_TAG}","saiyedin786")
+                        }
+                }
+            }
+        }
+        
+        stage("Docker: Push to DockerHub"){
+            steps{
+                script{
+                    docker_push("shopnow-admin","${params.ADMIN_DOCKER_TAG}","saiyedin786") 
+                    docker_push("shopnow-backend","${params.BACKEND_DOCKER_TAG}","saiyedin786")
+                    docker_push("shopnow-frontend","${params.FRONTEND_DOCKER_TAG}","saiyedin786")
+                }
+            }
+        }
+    }
+    post{
+        success{
+        
+           build job: "capstone-CD",
+	   wait: true,
+           propagate: false,
+           parameters: [
+           string(name: 'ADMIN_DOCKER_TAG', value: "${params.ADMIN_DOCKER_TAG}"),
+           string(name: 'FRONTEND_DOCKER_TAG', value: "${params.FRONTEND_DOCKER_TAG}"),
+           string(name: 'BACKEND_DOCKER_TAG', value: "${params.BACKEND_DOCKER_TAG}")
+           ]
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+capstone-CD
+@Library('Shared') _
+pipeline {
+    agent any
+    
+    parameters {
+        string(name: 'ADMIN_DOCKER_TAG', defaultValue: '', description: 'Admin Docker tag of the image built by the CI job')
+        string(name: 'FRONTEND_DOCKER_TAG', defaultValue: '', description: 'Frontend Docker tag of the image built by the CI job')
+        string(name: 'BACKEND_DOCKER_TAG', defaultValue: '', description: 'Backend Docker tag of the image built by the CI job')
+    }
+
+    stages {
+        stage("Workspace cleanup"){
+            steps{
+                script{
+                    cleanWs()
+                }
+            }
+        }
+        
+        stage('Git: Code Checkout') {
+            steps {
+                script{
+                    code_checkout("https://github.com/saiyedin786/Hero-capstone-project.git","main")
+                }
+            }
+        }
+        
+        stage('Verify: Docker Image Tags') {
+            steps {
+                script{
+                    echo "ADMIN_DOCKER_TAG: ${params.ADMIN_DOCKER_TAG}"
+                    echo "FRONTEND_DOCKER_TAG: ${params.FRONTEND_DOCKER_TAG}"
+                    echo "BACKEND_DOCKER_TAG: ${params.BACKEND_DOCKER_TAG}"
+                }
+            }
+        }
+        
+        
+      stage("Update: Helm values.yaml files") {
+    steps {
+        script {
+
+            dir('kubernetes/helm/charts/admin') {
+                sh """
+                    sed -i "s/^[[:space:]]*tag:.*/  tag: ${params.ADMIN_DOCKER_TAG}/" values.yaml
+                """
+            }
+
+            dir('kubernetes/helm/charts/backend') {
+                sh """
+                    sed -i "s/^[[:space:]]*tag:.*/  tag: ${params.BACKEND_DOCKER_TAG}/" values.yaml
+                """
+            }
+
+            dir('kubernetes/helm/charts/frontend') {
+                sh """
+                    sed -i "s/^[[:space:]]*tag:.*/  tag: ${params.FRONTEND_DOCKER_TAG}/" values.yaml
+                """
+            }
+        }
+    }
+}
+        
+        stage("Git: Code update and push to GitHub"){
+            steps{
+                script{
+                    withCredentials([gitUsernamePassword(credentialsId: 'Github-cred', gitToolName: 'Default')]) {
+                        sh '''
+                        echo "Checking repository status: "
+                        git status
+                    
+                        echo "Adding changes to git: "
+                        git add .
+                        
+                        echo "Commiting changes: "
+                        git commit -m "Updated environment variables"
+                        
+                        echo "Pushing changes to github: "
+                        git push https://github.com/saiyedin786/Hero-capstone-project.git main
+                    '''
+                    }
+                }
+            }
+        }
+    }
+  post {
+        success {
+            script {
+                emailext attachLog: true,
+                from: 'saiyedin786@gmail.com',
+                subject: "Shopnow Application has been updated and deployed - '${currentBuild.result}'",
+                body: """
+                    <html>
+                    <body>
+                        <div style="background-color: #FFA07A; padding: 10px; margin-bottom: 10px;">
+                            <p style="color: black; font-weight: bold;">Project: ${env.JOB_NAME}</p>
+                        </div>
+                        <div style="background-color: #90EE90; padding: 10px; margin-bottom: 10px;">
+                            <p style="color: black; font-weight: bold;">Build Number: ${env.BUILD_NUMBER}</p>
+                        </div>
+                        <div style="background-color: #87CEEB; padding: 10px; margin-bottom: 10px;">
+                            <p style="color: black; font-weight: bold;">URL: ${env.BUILD_URL}</p>
+                        </div>
+                    </body>
+                    </html>
+            """,
+            to: 'saiyedin786@gmail.com',
+            mimeType: 'text/html'
+            }
+        }
+      failure {
+            script {
+                emailext attachLog: true,
+                from: 'saiyedin786@gmail.com',
+                subject: "Shopnow Application build failed - '${currentBuild.result}'",
+                body: """
+                    <html>
+                    <body>
+                        <div style="background-color: #FFA07A; padding: 10px; margin-bottom: 10px;">
+                            <p style="color: black; font-weight: bold;">Project: ${env.JOB_NAME}</p>
+                        </div>
+                        <div style="background-color: #90EE90; padding: 10px; margin-bottom: 10px;">
+                            <p style="color: black; font-weight: bold;">Build Number: ${env.BUILD_NUMBER}</p>
+                        </div>
+                    </body>
+                    </html>
+            """,
+            to: 'saiyedin786@gmail.com',
+            mimeType: 'text/html'
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+extra ignore below lines
+
+kubectl port-forward svc/frontend 9090:80 -n shopnow-demo --address 0.0.0.0
+
+kubectl port-forward svc/admin 9091:80 -n shopnow-demo --address 0.0.0.0
+
+
+
+
+sudo usermod -aG jenkins $USER
+newgrp jenkins
+
+sudo usermod -aG docker jenkins
+sudo systemctl restart docker
+sudo systemctl restart jenkins
