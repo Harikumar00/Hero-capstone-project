@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: saiyedin786/shopnow-backend
+  repository: hari123580/shopnow-backend
   tag: v4
   pullPolicy: IfNotPresent
 

@@ -21,7 +21,7 @@ pipeline {
         stage('Git: Code Checkout') {
             steps {
                 script{
-                    code_checkout("https://github.com/saiyedin786/Hero-capstone-project.git","main")
+                    code_checkout("https://github.com/Harikumar00/Hero-capstone-project.git","main")
                 }
             }
         }
@@ -59,7 +59,7 @@ pipeline {
         stage('Git: Code Checkout') {
             steps {
                 script{
-                    code_checkout("https://github.com/saiyedin786/Hero-capstone-project.git","main")
+                    code_checkout("https://github.com/Harikumar00/Hero-capstone-project.git","main")
                 }
             }
         }
@@ -119,7 +119,7 @@ pipeline {
                         git commit -m "Updated environment variables"
                         
                         echo "Pushing changes to github: "
-                        git push https://github.com/saiyedin786/Hero-capstone-project.git main
+                        git push https://github.com/Harikumar00/Hero-capstone-project.git main
                     '''
                     }
                 }
@@ -130,7 +130,7 @@ pipeline {
         success {
             script {
                 emailext attachLog: true,
-                from: 'saiyedin786@gmail.com',
+                from: 'hariajuaju.ha@gmail.com',
                 subject: "Shopnow Application has been updated and deployed - '${currentBuild.result}'",
                 body: """
                     <html>
@@ -147,14 +147,14 @@ pipeline {
                     </body>
                     </html>
             """,
-            to: 'saiyedin786@gmail.com',
+            to: 'hariajuaju.ha@gmail.com',
             mimeType: 'text/html'
             }
         }
       failure {
             script {
                 emailext attachLog: true,
-                from: 'saiyedin786@gmail.com',
+                from: 'hariajuaju.ha@gmail.com',
                 subject: "Shopnow Application build failed - '${currentBuild.result}'",
                 body: """
                     <html>
@@ -168,7 +168,7 @@ pipeline {
                     </body>
                     </html>
             """,
-            to: 'saiyedin786@gmail.com',
+            to: 'hariajuaju.ha@gmail.com',
             mimeType: 'text/html'
             }
         }
@@ -190,7 +190,7 @@ pipeline {
                         git commit -m "Updated environment variables"
                         
                         echo "Pushing changes to github: "
-                        git push https://github.com/saiyedin786/Wanderlust-Mega-Project.git main
+                        git push https://github.com/Harikumar00/Hero-capstone-project.git main
                     '''
                     }
                 }
@@ -201,7 +201,7 @@ pipeline {
         success {
             script {
                 emailext attachLog: true,
-                from: 'saiyedin786@gmail.com',
+                from: 'hariajuaju.ha@gmail.com',
                 subject: "Shopnow Application has been updated and deployed - '${currentBuild.result}'",
                 body: """
                     <html>
@@ -218,14 +218,14 @@ pipeline {
                     </body>
                     </html>
             """,
-            to: 'saiyedin786@gmail.com',
+            to: 'hariajuaju.ha@gmail.com',
             mimeType: 'text/html'
             }
         }
       failure {
             script {
                 emailext attachLog: true,
-                from: 'saiyedin786@gmail.com',
+                from: 'hariajuaju.ha@gmail.com',
                 subject: "Shopnow Application build failed - '${currentBuild.result}'",
                 body: """
                     <html>
@@ -239,7 +239,7 @@ pipeline {
                     </body>
                     </html>
             """,
-            to: 'saiyedin786@gmail.com',
+            to: 'hariajuaju.ha@gmail.com',
             mimeType: 'text/html'
             }
         }

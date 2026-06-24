@@ -8,14 +8,14 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/saiyedin786/Hero-capstone-project.git'
+    repoURL: 'https://github.com/Harikumar00/Hero-capstone-project.git'
     targetRevision: HEAD
     path: kubernetes/helm/charts/admin
     helm:
       valueFiles: []
       releaseName: admin
   destination:
-    server: 'https://E7A7A4713A01052C7BC01F7A8EB2CB0E.gr7.ap-south-1.eks.amazonaws.com'
+    server: 'https://kubernetes.default.svc'
     namespace: shopnow-demo
   syncPolicy:
     automated:

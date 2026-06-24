@@ -33,7 +33,7 @@ pipeline {
         stage('Git: Code Checkout') {
             steps {
                 script{
-                    code_checkout("https://github.com/saiyedin786/Hero-capstone-project.git","main")
+                    code_checkout("https://github.com/Harikumar00/Hero-capstone-project.git","main")
                 }
             }
         }
@@ -79,15 +79,15 @@ pipeline {
             steps{
                 script{
                         dir('admin'){
-                            docker_build("shopnow-admin","${params.ADMIN_DOCKER_TAG}","saiyedin786")
+                            docker_build("shopnow-admin","${params.ADMIN_DOCKER_TAG}","hari123580")
                         }
                     
                         dir('backend'){
-                            docker_build("shopnow-backend","${params.BACKEND_DOCKER_TAG}","saiyedin786")
+                            docker_build("shopnow-backend","${params.BACKEND_DOCKER_TAG}","hari123580")
                         }
                     
                         dir('frontend'){
-                            docker_build("shopnow-frontend","${params.FRONTEND_DOCKER_TAG}","saiyedin786")
+                            docker_build("shopnow-frontend","${params.FRONTEND_DOCKER_TAG}","hari123580")
                         }
                 }
             }
@@ -96,9 +96,9 @@ pipeline {
         stage("Docker: Push to DockerHub"){
             steps{
                 script{
-                    docker_push("shopnow-admin","${params.BACKEND_DOCKER_TAG}","saiyedin786") 
-                    docker_push("shopnow-backend","${params.FRONTEND_DOCKER_TAG}","saiyedin786")
-                    docker_push("shopnow-frontend","${params.FRONTEND_DOCKER_TAG}","saiyedin786")
+                    docker_push("shopnow-admin","${params.BACKEND_DOCKER_TAG}","hari123580") 
+                    docker_push("shopnow-backend","${params.FRONTEND_DOCKER_TAG}","hari123580")
+                    docker_push("shopnow-frontend","${params.FRONTEND_DOCKER_TAG}","hari123580")
                 }
             }
         }
@@ -114,3 +114,17 @@ pipeline {
         }
     }
 }
+stage("Docker: Build Images"){
+            steps{
+                script{
+                        dir('admin'){
+                            docker_build("shopnow-admin","${params.ADMIN_DOCKER_TAG}","hari123580")
+                        }
+
+                        dir('backend'){
+                            docker_build("shopnow-backend","${params.BACKEND_DOCKER_TAG}","hari123580")
+                        }
+
+                        dir('frontend'){
+                            docker_build("shopnow-frontend","${params.FRONTEND_DOCKER_TAG}","hari123580")
+                  
