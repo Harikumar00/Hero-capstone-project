@@ -107,7 +107,7 @@ pipeline {
     }
     post{
         success{
-            archiveArtifacts artifacts: '*.xml', followSymlinks: false
+            archiveArtifacts artifacts: '*.xml', followSymlinks: false, allowEmptyArchive: true
             build job: "shopnow-CD", parameters: [
                 string(name: 'ADMIN_DOCKER_TAG', value: "${params.ADMIN_DOCKER_TAG}"),
                 string(name: 'FRONTEND_DOCKER_TAG', value: "${params.FRONTEND_DOCKER_TAG}"),
