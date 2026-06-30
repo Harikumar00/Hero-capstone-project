@@ -40,8 +40,3 @@ spec:
 
       volumes:
         - name: mongo-data
-<<<<<<< HEAD
-          emptyDir: {}
-=======
-          emptyDir: {}
->>>>>>> a425110836d48c89a705a02d927ed591fcbb2f7f
