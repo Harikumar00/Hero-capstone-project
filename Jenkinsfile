@@ -76,6 +76,10 @@ pipeline {
         stage("Docker: Build Images"){
             steps{
                 script{
+                     echo "ADMIN_DOCKER_TAG='${params.ADMIN_DOCKER_TAG}'"
+                     echo "BACKEND_DOCKER_TAG='${params.BACKEND_DOCKER_TAG}'"
+                     echo "FRONTEND_DOCKER_TAG='${params.FRONTEND_DOCKER_TAG}'"
+
                         dir('admin'){
                             docker_build("shopnow-admin","${params.ADMIN_DOCKER_TAG}","hari123580")
                         }
