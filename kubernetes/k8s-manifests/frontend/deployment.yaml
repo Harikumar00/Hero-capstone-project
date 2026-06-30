@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: hari123580/shopnow-frontend:v3
+        image: hari123580/shopnow-frontend:latest
         ports:
         - containerPort: 80
         resources:

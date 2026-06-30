@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: admin
-        image: hari123580/shopnow-admin:v3
+        image: hari123580/shopnow-admin:latest
         ports:
         - containerPort: 80
         resources:
