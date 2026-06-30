@@ -67,17 +67,21 @@ pipeline {
                 script{
                     withCredentials([gitUsernamePassword(credentialsId: 'Github-cred', gitToolName: 'Default')]) {
                         sh '''
-                        echo "Checking repository status: "
-                        git status
-                    
-                        echo "Adding changes to git: "
-                        git add .
-                        
-                        echo "Commiting changes: "
-                        git commit -m "Updated environment variables"
-                        
-                        echo "Pushing changes to github: "
-                        git push https://github.com/saiyedin786/Wanderlust-Mega-Project.git main
+                    git config user.name "Jenkins"
+                    git config user.email "jenkins@local"
+
+                    echo "Checking repository status..."
+                    git status
+
+                    echo "Adding changes..."
+                    git add .
+
+                    echo "Committing..."
+                    git commit -m "Updated Kubernetes manifests" || true
+
+                    echo "Pushing to GitHub..."
+                    git push https://github.com/Harikumar00/Hero-capstone-project.git HEAD:main
+
                     '''
                     }
                 }
@@ -88,7 +92,7 @@ pipeline {
         success {
             script {
                 emailext attachLog: true,
-                from: 'saiyedin786@gmail.com',
+                from: 'hari123580@gmail.com',
                 subject: "Shopnow Application has been updated and deployed - '${currentBuild.result}'",
                 body: """
                     <html>
@@ -105,14 +109,14 @@ pipeline {
                     </body>
                     </html>
             """,
-            to: 'saiyedin786@gmail.com',
+            to: 'hari123580@gmail.com',
             mimeType: 'text/html'
             }
         }
       failure {
             script {
                 emailext attachLog: true,
-                from: 'saiyedin786@gmail.com',
+                from: 'hari123580@gmail.com',
                 subject: "Shopnow Application build failed - '${currentBuild.result}'",
                 body: """
                     <html>
@@ -126,7 +130,7 @@ pipeline {
                     </body>
                     </html>
             """,
-            to: 'saiyedin786@gmail.com',
+            to: 'hari123580@gmail.com',
             mimeType: 'text/html'
             }
         }
