@@ -96,9 +96,9 @@ pipeline {
         stage("Docker: Push to DockerHub"){
             steps{
                 script{
-                    docker_push("shopnow-admin","${params.BACKEND_DOCKER_TAG}","saiyedin786") 
-                    docker_push("shopnow-backend","${params.FRONTEND_DOCKER_TAG}","saiyedin786")
-                    docker_push("shopnow-frontend","${params.FRONTEND_DOCKER_TAG}","saiyedin786")
+                    docker_push("shopnow-admin","${params.ADMIN_DOCKER_TAG}","hari123580") 
+                    docker_push("shopnow-backend","${params.BACKEND_DOCKER_TAG}","hari123580")
+                    docker_push("shopnow-frontend","${params.FRONTEND_DOCKER_TAG}","hari123580")
                 }
             }
         }
