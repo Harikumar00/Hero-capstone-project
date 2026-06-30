@@ -1,4 +1,4 @@
-# 🚀 End-to-End DevOps CI/CD Pipeline on AWS EKS
+<img width="1440" height="900" alt="Screenshot 2026-06-30 at 17 59 56" src="https://github.com/user-attachments/assets/a170702b-f76e-4237-8b1b-35d37a82901f" /># 🚀 End-to-End DevOps CI/CD Pipeline on AWS EKS
 
 ## 📌 Project Overview
 
@@ -431,23 +431,17 @@ Step-1 Create new Iam user
 
 Go to aws console->IAM-> create user
 
-<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/3897eb7c-27ea-4758-ad0f-01c665553662" />
-
-<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/4343bdd2-e76f-443f-8ab6-10e58bc3dcd4" />
-
-<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/a7fbad86-73e3-4814-9cc0-c10246d24e3a" />
-
-<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/1e1bd5eb-527d-4006-904a-d38e06f71da5" />
-
-<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/ded5f18e-933a-4dfd-b85f-82463d04d35e" />
+<img width="1440" height="900" alt="Screenshot 2026-06-30 at 17 58 00" src="https://github.com/user-attachments/assets/4407877c-60f9-4e4e-8fde-4412e3792563" />
+<img width="1440" height="900" alt="Screenshot 2026-06-30 at 17 58 19" src="https://github.com/user-attachments/assets/28f82e29-04cc-432a-bbd0-2e5c7d774c67" />
+<img width="1440" height="900" alt="Screenshot 2026-06-30 at 17 58 58" src="https://github.com/user-attachments/assets/ff3817a3-5545-4c56-8f9d-6a655cd29a8c" />
+<img width="1440" height="900" alt="Screenshot 2026-06-30 at 18 00 28" src="https://github.com/user-attachments/assets/b899c39d-0d0e-4447-9ffa-f2dd53df2838" />
 
 configuring aws in local computer
 
 aws configure
 
-<img width="975" height="548" alt="image" src="https://github.com/user-attachments/assets/1262a993-838b-4f0b-8dd9-cb8b0e5e9afd" />
+<img width="1440" height="900" alt="Screenshot 2026-06-30 at 18 01 28" src="https://github.com/user-attachments/assets/c25c361f-09fb-4d9a-8487-e2d4a723352f" />
 
-Enter your credentials for the newly create IAM user as above
 
 Step-2 creating an jenkinsmaster ec2 instance using terraform
 
