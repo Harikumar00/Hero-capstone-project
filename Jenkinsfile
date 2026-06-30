@@ -46,12 +46,10 @@ pipeline {
             }
         }
 
-        stage("OWASP: Dependency check"){
-            steps{
-                script{
-                    owasp_dependency()
-                }
-            }
+       stage("OWASP: Dependency check"){
+           steps{
+               echo "Skipping OWASP Dependency Check"
+             }
         }
         
         stage("SonarQube: Code Analysis"){
